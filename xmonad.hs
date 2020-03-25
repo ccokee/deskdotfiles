@@ -1,0 +1,413 @@
+-- ###### Imports ###### --
+-- ### Xmonad ### --
+--{-# LANGUAGE NoMonomorphismRestriction #-}
+import XMonad
+import XMonad.Util.Run 
+import XMonad.Util.EZConfig (additionalMouseBindings)
+import XMonad.Actions.CycleWS
+import XMonad.Actions.SpawnOn
+import XMonad.Actions.GridSelect
+import XMonad.Actions.MouseGestures
+import XMonad.Actions.SwapWorkspaces
+import XMonad.Actions.WorkspaceNames
+import XMonad.Actions.CopyWindow
+import XMonad.Actions.WithAll
+import XMonad.Actions.WindowGo
+import qualified Data.Map as M
+import qualified XMonad.StackSet as W
+import Data.Bits ((.|.))
+import Data.Monoid
+import Data.Ratio ((%))
+import Graphics.X11.Xlib
+import Graphics.X11.Xlib.Extras 
+
+-- ### System ### --
+import System.IO
+import System.Exit
+
+-- ### Prompt ### --
+import XMonad.Prompt
+import XMonad.Prompt.RunOrRaise (runOrRaisePrompt)
+import XMonad.Prompt.AppendFile (appendFilePrompt)
+
+-- ### Hooks ### --
+import XMonad.ManageHook
+import XMonad.Hooks.ManageDocks
+import XMonad.Hooks.ManageHelpers
+import XMonad.Hooks.SetWMName
+import XMonad.Hooks.DynamicLog
+import XMonad.Hooks.UrgencyHook
+import XMonad.Hooks.FadeInactive
+import XMonad.Hooks.EwmhDesktops
+import XMonad.Operations
+ 
+-- ### Layout ### --
+import XMonad.Layout
+import XMonad.Layout.NoBorders (smartBorders, noBorders)
+import XMonad.Layout.PerWorkspace (onWorkspace, onWorkspaces)
+import XMonad.Layout.Reflect (reflectHoriz)
+import XMonad.Layout.IM
+import XMonad.Layout.SimpleFloat
+import XMonad.Layout.Spacing
+import XMonad.Layout.ResizableTile
+import XMonad.Layout.LayoutHints
+import XMonad.Layout.LayoutModifier
+import XMonad.Layout.Grid
+import XMonad.Layout.Tabbed
+import XMonad.Layout.TrackFloating
+
+-- ### GSconfig --
+greenColorizer = colorRangeFromClassName
+                     black            -- lowest inactive bg
+                     (0x70,0xFF,0x70) -- highest inactive bg
+                     black            -- active bg
+                     white            -- inactive fg
+                     white            -- active fg
+  where black = minBound
+        white = maxBound
+                     
+--spawnConf colorizer = (buildDefaultGSConfig greenColorizer) {gs_cellheight =30, gs_cellwidth = 100}
+   
+--conf = spawnConf greenColorizer
+
+spawnSelected' :: [(String, String)] -> X ()
+spawnSelected' lst = gridselect conf lst >>= flip whenJust spawn
+ --   where conf = spawnConf greenColorizer
+  where conf = defaultGSConfig 
+-- ### Terminal ### --
+myTerminal = "terminator"
+
+-- ### modMask ### -- 
+mymodMask :: KeyMask
+mymodMask = mod4Mask
+
+-- ### Workspaces ### --
+myWorkspaces = ["cKdesk","www","dev","com","file","net","vm","media"]
+
+-- ### Bars/Dzen2  ### --
+myScreen1XmonadBarTop = "Lang=es dzen2 -dock -x '0' -y '0' -h '20' -w '1920' -ta 'l' -fg '#999999' -bg '#000000' -fn '-xos4-terminus-*-*-*-*-14-*-*-*-*-*-iso10646-*' -e 'button2=;'"
+myScreen2XmonadBarTopLeft = "~/.xmonad/dzen/status_bars/dzen_cK.sh | Lang=es dzen2 -dock -x '1920' -y '0' -h '20' -w '40' -ta 'c' -fg '#999999' -bg '#000000' -fn '-xos4-terminus-*-*-*-*-14-*-*-*-*-*-iso10646-*' -e 'button2=;'"
+myScreen2XmonadBarTopMid = "LANG=es dzen2 -dock -x '1960' -y '0' -h '20' -w '1101' -ta 'l' -fg '#999999' -bg '#000000' -fn '-xos4-terminus-*-*-*-*-14-*-*-*-*-*-iso10646-*' -e 'button2=;'"
+myScreen2XmonadBarTopRight = "~/.xmonad/dzen/status_bars/dzen_secondary.sh | LANG=es dzen2 -dock -x '3043' -y '0' -h '20' -w '' -ta 'r' -fg '#999999' -bg '#000000' -fn '-xos4-terminus-*-*-*-*-14-*-*-*-*-*-iso10646-*' -e 'button2=;'"
+myScreen3XmonadBarTop = "LANG=es dzen2 -dock -x '3044' -y '0' -h '20' -w '1920' -ta 'l' -fg '#999999' -bg '#000000' -fn '-xos4-terminus-*-*-*-*-14-*-*-*-*-*-iso10646-*' -e 'button2=;'"
+
+myScreen1XmonadBarDown = "~/.xmonad/dzen/status_bars/dzen_main.sh | LANG=es dzen2 -dock -x '0' -y '1080' -h '20' -w '1920' -ta 'c' -fg '#999999' -bg '#000000' -fn '-xos4-terminus-*-*-*-*-12-*-*-*-*-*-iso10646-*' -e 'button2=;'"
+myScreen2XmonadBarDown = "~/.xmonad/dzen/status_bars/dzen_audio.sh | LANG=es dzen2 -dock -x '1921' -y '1080' -h '20' -w '1920' -ta 'l' -fg '#999999' -bg '#000000' -fn '-xos4-terminus-*-*-*-*-12-*-*-*-*-*-iso10646-*' -e 'button2=;'"
+myScreen3XmonadBarDown = "LANG=es dzen2 -dock -x '3842' -y '1080' -h '20' -w '1920' -ta 'c' -fg '#999999' -bg '#000000' -fn '-xos4-terminus-*-*-*-*-12-*-*-*-*-*-iso10646-*' -e 'button2=;'"
+
+myBitmapsDir = ".xmonad/dzen/icons"
+
+-- ### Main ### --
+main = do
+    dzenScreen1top  <- spawnPipe myScreen1XmonadBarTop
+    dzenScreen2topl <- spawnPipe myScreen2XmonadBarTopLeft
+    dzenScreen2topm <- spawnPipe myScreen2XmonadBarTopMid
+    dzenScreen2topr <- spawnPipe myScreen2XmonadBarTopRight
+    dzenScreen3top  <- spawnPipe myScreen3XmonadBarTop
+    dzenScreen1down <- spawnPipe myScreen1XmonadBarDown
+    dzenScreen2down <- spawnPipe myScreen2XmonadBarDown
+    dzenScreen3down <- spawnPipe myScreen3XmonadBarDown
+    xmonad $ docks def {
+      terminal            = myTerminal
+    , workspaces          = myWorkspaces
+    , keys                = myKeys
+    , modMask             = mymodMask
+    , layoutHook          = myLayoutHook
+    , manageHook          = manageSpawn <+> myManageHook
+    , logHook             = myLogHook dzenScreen2topm
+    , normalBorderColor   = colorNormalBorder
+    , focusedBorderColor  = colorFocusedBorder
+    , borderWidth         = 0 
+    , startupHook  = myStartupHook } `additionalMouseBindings` myMouse
+
+-- ### StartupHook ### --
+myStartupHook :: X ()
+myStartupHook = do
+    setWMName "LG3D"
+    spawn "stalonetray"
+    spawn "feh --bg-fill --no-xinerama ./Imágenes/Wallpapers/2020.png"
+    spawn "compton -cfb -D 1 -r 15 -l -15 -t -12 -o 0.6 -e 1.0 -i 1.0"
+    spawn "setxkbmap es"
+    spawn "xsetroot -cursor_name left_ptr"
+    spawn "npm run start --prefix ~/git/Odrive"
+    spawn "/home/coke/.xmonad/dzen/status_checks/checker.sh"
+    spawn "blueman-applet"
+    spawn "dropbox autostart"
+    spawnOn "file" "thunar"
+    spawnOn "file" "thunar /"
+    spawnOn "www" "opera"
+    spawnOn "com" "skypeforlinux"
+    spawnOn "cKdesk" "/home/coke/.xmonad/cKpanel.sh"
+    spawnOn "net" "terminator -e '/home/coke/.xmonad/cKmayhem.sh'"
+
+-- ### ManageHook ### --
+myManageHook :: ManageHook
+myManageHook = (composeAll . concat $
+    [ [resource     =? r            --> doIgnore                |   r   <- myIgnores] -- ignore desktop
+    , [className    =? c            --> doShift  "dev"          |   c   <- myDev    ] -- move myDev to dev
+    , [className    =? c            --> doShift  "file"         |   c   <- myFiles  ] -- move myFiles to file
+    , [className    =? c            --> doShift  "media"        |   c   <- myMedia  ] -- move myMedia to media
+    , [className    =? c            --> doShift  "com"          |   c   <- myChat   ] -- move myChat  to com
+    , [className    =? c            --> doShift  "vm"           |   c   <- myVBox   ] -- move myVBox  to virt
+    , [className    =? c            --> doCenterFloat           |   c   <- myFloats ] -- float my floats
+    , [name         =? n            --> doCenterFloat           |   n   <- myNames  ] -- float my names
+    , [isFullscreen                 --> myDoFullFloat                           ]]) 
+ 
+    where
+ 
+        role      = stringProperty "WM_WINDOW_ROLE"
+        name      = stringProperty "WM_NAME"
+        -- classnames
+        myTerms   = ["aterm","urxvt","terminator","xfce4-terminal"]
+        myFloats  = ["vlc","gimp","VirtualBox","skype"]
+        myWebs    = ["firefox","google-chrome","chrome","opera"]
+        myMedia   = ["Spotify","vlc","VLC","kodi","Kodi"]
+        myChat    = ["skype"]
+        myFiles   = ["nautilus","mc"]
+        myDev     = ["gvim","eclipse","ADT","emacs"]
+        myVBox    = ["VirtualBox","Virtualbox-bin","vbox","qemu"]
+        -- resources
+        myIgnores = ["desktop","desktop_window","notify-osd","stalonetray","trayer"]
+        -- names
+        myNames   = ["bashrun","Google Chrome Options","Chromium Options"]
+
+-- ### LogHook ### --
+myLogHook :: Handle -> X ()
+myLogHook h = dynamicLogWithPP $ defaultPP
+    {
+        ppCurrent           =   dzenColor "#00aa6c" "#000000" . wrap "^fg(#00aa6c)[^fg(#ffffff)" 
+"^fg(#00aa6c)]"
+      , ppVisible           =   dzenColor "#00aa6c" "#000000" . wrap "^fg(#ffffff)[^fg(#00aa6c)" 
+"^fg(#ffffff)]"
+      , ppHidden            =   dzenColor "#cccccc" "#000000" . pad
+      , ppHiddenNoWindows   =   dzenColor "#999999" "#000000" . pad
+      , ppUrgent            =   dzenColor "#ff0000" "#000000" . pad
+      , ppOutput            =   hPutStrLn h
+      , ppWsSep             =   " "
+      , ppSep               =   " | "
+      , ppLayout            =   dzenColor "#00aa6c" "#000000" .
+                                (\x -> case x of
+                                    "Spacing 7 ResizableTall"             ->      "^i(" ++ myBitmapsDir ++ "/tall.xbm)"
+                                    "Mirror Spacing 7 ResizableTall"      ->      "^i(" ++ myBitmapsDir ++ "/mtall.xbm)"
+                                    "Full"                      ->      "^i(" ++ myBitmapsDir ++ "/full.xbm)"
+                                    "Simple Float"              ->      "~"
+                                    "IM Simple Float"           ->      "^i(" ++ myBitmapsDir ++ "/full.xbm)"
+                                    "ReflectX Spacing 7 ResizableTall"    ->      "^i(" ++ myBitmapsDir ++ "/tall.xbm)"
+                                    "Spacing 7 Grid"            ->      "^i(" ++ myBitmapsDir ++ "/full.xbm"
+                                    _                           ->      x
+                                )
+      , ppTitle             =   (" " ++) . dzenColor "#00aa6c" "#000000" . dzenEscape
+    }
+
+-- ### LayoutHook ### --
+myLayoutHook  = onWorkspaces ["cKdesk"] cKlapLayout $ 
+                onWorkspaces ["web"] wwwLayout $
+                onWorkspaces ["dev"] simpLayout $
+                onWorkspaces ["com"] chatLayout $
+                onWorkspaces ["file"] simpLayout $
+                onWorkspaces ["net"] netLayout $
+                onWorkspaces ["vm"] vBoxLayout $
+                onWorkspaces ["media"] mediaLayout $
+                simpLayout
+
+-- ### Layouts ### --
+
+cKlapLayout = avoidStruts $ tiled ||| Mirror tiled ||| noBorders Full ||| simpleFloat
+ where
+   tiled = spacing  4 $ ResizableTall 1 (2/100) (0.60) []
+
+wwwLayout = avoidStruts $ tiled ||| noBorders Full ||| Mirror tiled ||| simpleFloat
+  where
+    tiled = spacing 4 $ ResizableTall 1 (2/100) (1/2) []
+ 
+simpLayout = avoidStruts $ tiled ||| noBorders Full ||| Mirror tiled ||| simpleFloat
+  where
+    tiled = spacing 4 $ ResizableTall 1 (2/100) (1/2) []
+ 
+vBoxLayout = avoidStruts $ noBorders simpleFloat ||| noBorders Full
+ 
+netLayout = avoidStruts $ smartBorders $ spacing 4 $ reflectHoriz Grid ||| simpleFloat
+    
+mediaLayout = avoidStruts $ smartBorders $ reflectHoriz Full
+
+chatLayout = avoidStruts $ noBorders Full
+
+-- ### Theme ### --
+colorOrange         = "#83bbf4"
+colorDarkGray       = "#1B1D1E"
+colorPink           = "#F92672"
+colorGreen          = "#A6E22E"
+colorBlue           = "#66D9EF"
+colorYellow         = "#E6DB74"
+colorWhite          = "#CCCCC6"
+colorNormalBorder   = "#CCCCCC"
+colorFocusedBorder  = "#EEEEEE"
+ 
+-- ### Fonts ### -- 
+barFont  = "-xos4-terminus-medium-*-*-*-12-*-*-*-*-*-iso10646-*"
+barXFont = "fixed"
+xftFont = "xft: fixed"
+
+-- ### Prompt Config ### --
+mXPConfig :: XPConfig
+mXPConfig =
+    defaultXPConfig { font                  = barFont
+                    , bgColor               = colorDarkGray
+                    , fgColor               = colorGreen
+                    , bgHLight              = colorGreen
+                    , fgHLight              = colorDarkGray
+                    , promptBorderWidth     = 0
+                    , height                = 12
+                    , historyFilter         = deleteConsecutive
+                    }
+-- ### Run or Raise Menu ### --
+largeXPConfig :: XPConfig
+largeXPConfig = mXPConfig
+                { font = xftFont
+                , height = 12
+                }
+
+
+-- ### Trick for fullscreen switching windows ### --
+myDoFullFloat :: ManageHook
+myDoFullFloat = doF W.focusDown <+> doFullFloat
+
+
+myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
+    [((modMask,		    xK_d        ), spawnSelected'	[("Synergy", "/home/coke/.xmonad/synergyconn.sh norestart")
+									,("Arandr", "arandr")
+									,("screen left", "/home/coke/.xmonad/lrandr.sh l")
+									,("screen right", "/home/coke/.xmonad/lrandr.sh r")
+									,("screen top", "/home/coke/.xmonad/lrandr.sh t")
+									,("screen bottom", "/home/coke/.xmonad/lrandr.sh b") 
+									])
+   , ((modMask,                    xK_r    ), spawnSelected'                 [("cKdesk",     "xfce4-terminal -e '/home/coke/.xmonad/waitcon.sh 2'")
+                                                                              ,("cKtv",       "xfce4-terminal -e '/home/coke/.xmonad/waitcon.sh 3'")
+                                                                              ,("cKws",       "xfce4-terminal -e '/home/coke/.xmonad/waitcon.sh 4'")
+                                                                              ,("cKvpn",      "xfce4-terminal -e '/home/coke/.xmonad/waitcon.sh 5'")
+                                                                              ,("cKsas",      "xfce4-terminal -e '/home/coke/.xmonad/waitcon.sh 6'")
+                                                                              ,("cKboard",    "xfce4-terminal -e '/home/coke/.xmonad/waitcon.sh 7'")
+									      ,("cKpppoe",    "xfce4-terminal -e '/home/coke/.xmonad/waitcon.sh 10'")
+									      ,("cKbodega",   "xfce4-terminal -e '/home/coke/.xmonad/waitcon.sh 11'")
+                                                                              ,("tun0",       "xfce4-terminal -e '/home/coke/.xmonad/waitcon.sh 8'")
+                                                                              ,("tun1",       "xfce4-terminal -e '/home/coke/.xmonad/waitcon.sh 9'")
+                                                                              ,("Exit",           "")
+                                                                              ])
+    , ((modMask .|. shiftMask,      xK_r    ), spawnSelected'                 [("desk.wol",        "xfce4-terminal -e '/home/coke/.xmonad/wol.sh'")
+                                                                              ,("desk.vnc",        "xfce4-terminal -e '/home/coke/.xmonad/vnc-conn.sh'")
+                                                                              ,("vpn.wol",         "xfce4-terminal -e '/home/coke/.xmonad/wol.sh 2'")
+                                                                              ,("vpn.route",       "xfce4-terminal -e '/home/coke/.xmonad/routeswitch.sh'")
+                                                                              ,("nas.plex",        "google-chrome-stable 'http://doctorbit.sytes.net:8002'")
+                                                                              ,("nas.deluge",      "google-chrome-stable 'http://doctorbit.sytes.net:8112'")
+                                                                              ,("net.monitor",     "google-chrome-stable 'http://doctorbit.sytes.net:8030'")
+                                                                              ,("dns.webui",       "google-chrome-stable 'http://doctorbit.sytes.net:8005'")
+                                                                              ,("kodi.remote",     "google-chorme-stable 'http://doctorbit.sytes.net:8004'")
+                                                                              ,("Panic Button!",   "google-chrome-stable 'http://doctorbit.sytes.net:8020'")
+                                                                              ,("Exit",           "")
+                                                                              ])
+    , ((modMask,                    xK_v    ), spawnSelected' [("Windows 10",     "VBoxManage startvm 'Windows 10'")
+                                                                              ,("Aderall",        "VBoxManage startvm 'Aderall'")
+                                                                              ,("Stratera",       "VBoxManage startvm 'Stratera'")
+                                                                              ,("Exit",           "")
+                                                                              ])
+    , ((modMask,                    xK_s    ), spawnSelected' [("Vpn",           "sudo /home/coke/.xmonad/vpnswitch.sh")
+                                                                              ,("Tor",           "sudo /home/coke/.xmonad/torswitch.sh")
+                                                                              ,("Nat forward",   "sudo /home/coke/.xmonad/natswitch.sh")
+                                                                              ,("Host AP",       "sudo /home/coke/.xmonad/hostapdswitch.sh")
+                                                                              ,("VNC Desk",      "/home/coke/.xmonad/vnc-conn.sh")
+                                                                              ,("Exit",           "")
+                                                                              ])
+    , ((modMask,                    xK_a    ), spawnSelected' [("Headphones",    "sudo /home/coke/.xmonad/audioswitch.sh")
+                                                                              ,("Speakers",      "sudo /home/coke/.xmonad/torswitch.sh")
+                                                                              ,("H & S",         "sudo /home/coke/.xmonad/natswitch.sh")
+                                                                              ,("Mute all",      "sudo /home/coke/.xmonad/hostapdswitch.sh")
+                                                                              ,("Exit",           "")
+                                                                              ])
+    , ((modMask,                    xK_k        ), spawn $ XMonad.terminal conf)
+    , ((modMask .|. controlMask,    xK_k        ), runOrRaise "xfce4-terminal" (className =? "xfce4-terminal"))
+    , ((modMask,                    xK_F2       ), spawn "lock & hibernate")
+    , ((modMask,                    xK_F12      ), spawn "sudo halt")
+    , ((modMask,                    xK_F11      ), spawn "sudo reboot")
+    , ((modMask,                    xK_KP_Insert ), spawn "sudo /home/coke/.xmonad/mountswitch.sh")
+    , ((modMask,                    xK_z    ), goToSelected defaultGSConfig)
+    , ((modMask,                    xK_x    ), spawnSelected' [("Halt","sudo halt"),("Reboot","sudo reboot"),("Suspend","xscreensaver-command -lock && sudo s2ram"),("Exit","")])
+    , ((modMask .|. shiftMask,      xK_c        ), spawn "iceweasel")
+    , ((modMask,                    xK_l        ), spawn "lock")
+    
+    , ((0,                          xK_Print    ), spawn "scrot $HOME/screenshots/`date +%d-%m-%Y_%H:%M:%S`.png -e 'xclip -selection clipboard -t image/png -i $f'")
+    , ((modMask .|. controlMask,    xK_s        ), spawn "sleep 0.5; scrot -s $HOME/screenshots/`date +%d-%m-%Y_%H:%M:%S`.png -e 'xclip -selection clipboard -t image/png -i $f'")
+    , ((modMask .|. shiftMask,      xK_s        ), spawn "scrot -u $HOME/screenshots/`date +%d-%m-%Y_%H:%M:%S`.png -e 'xclip -selection clipboard -t image/png -i $f'")
+    , ((modMask,                    xK_c        ), spawn "opera")
+    , ((modMask,                    xK_n        ), spawn "thunar")
+    
+    , ((0,                          0x1008ff12  ), spawn "amixer -c 0 sset Master toggle")        -- XF86AudioMute
+    , ((0,                          0x1008ff11  ), spawn "amixer -c 0 sset Master 5%-")           -- XF86AudioLowerVolume
+    , ((0,                          0x1008ff13  ), spawn "amixer -c 0 sset Master 5%+")  
+    , ((0,                          0x1008ff14  ), spawn "mpc play")
+    , ((0,                          0x1008ff15  ), spawn "mpc stop")
+    , ((0,                          0x1008ff17  ), spawn "mpc next")
+    , ((0,                          0x1008ff16  ), spawn "mpc prev")
+    , ((modMask,                    xK_g        ), spawn "gimp")
+    , ((modMask .|. shiftMask,      xK_v        ), spawn "virtualbox")
+    , ((modMask .|. shiftMask,      xK_w        ), spawn "sudo wireshark")
+    , ((modMask .|. controlMask,    xK_w        ), spawn "sudo zenmap")
+    , ((modMask,                    xK_o        ), spawn "~/tor-browser_es-ES/Browser/start-tor-browser")
+    , ((modMask,        xK_KP_Insert        ), spawn "/home/coke/.xmonad/audioswitch.sh")
+    , ((modMask,                    xK_m        ), spawn "vlc")
+    , ((modMask .|. shiftMask,      xK_m        ), spawn "kodi")
+    , ((modMask,                    xK_e        ), spawn "code")
+    , ((modMask .|. shiftMask,      xK_e        ), spawn "gedit --new-window") 
+    , ((modMask .|. controlMask,       xK_e        ), spawn "eclipse-bin-4.6")
+    , ((modMask,                    xK_space    ), sendMessage NextLayout)
+    , ((modMask .|. shiftMask,      xK_space    ), setLayout $ XMonad.layoutHook conf)          -- reset layout on current desktop to default
+    , ((modMask,                    xK_b        ), sendMessage ToggleStruts)
+    , ((modMask .|. mod1Mask,       xK_r        ), spawn "gmrun")
+    , ((modMask,                    xK_Tab      ), windows W.focusDown)                       
+    -- , ((modMask .|. shiftMask,      xK_j        ), windows W.focusDown)
+    -- , ((modMask .|. shiftMask,      xK_k        ), windows W.focusUp  )
+    , ((modMask .|. shiftMask,      xK_k        ), kill)
+    , ((modMask .|. mod1Mask,       xK_k	), kill1)
+    , ((modMask .|. mod1Mask .|. shiftMask,       xK_k        ), killAllOtherCopies)
+    , ((modMask .|. shiftMask,      xK_Down        ), windows W.swapDown)                          -- swap the focused window with the next window
+    , ((modMask .|. shiftMask,      xK_Up        ), windows W.swapUp)                            -- swap the focused window with the previous window
+    , ((modMask,                    xK_Return   ), windows W.swapMaster)
+    , ((modMask .|. controlMask,    xK_t        ), sinkAll)
+    , ((modMask,                    xK_t        ), withFocused $ windows . W.sink)              -- Push window back into tiling
+    , ((modMask,                    xK_h        ), sendMessage Shrink)                          -- %! Shrink a master area
+    , ((modMask,                    xK_l        ), sendMessage Expand)                          -- %! Expand a master area
+    , ((modMask,                    xK_comma    ), sendMessage (IncMasterN 1))
+    , ((modMask,                    xK_period   ), sendMessage (IncMasterN (-1)))
+ 
+    -- workspaces
+    , ((modMask,                    xK_Right     ), nextWS)
+    , ((modMask .|. shiftMask,      xK_Right     ), shiftToNext)
+    , ((modMask,                    xK_Left      ), prevWS)
+    , ((modMask .|. shiftMask,      xK_Left      ), shiftToPrev)
+ 
+    -- quit, or restart
+    , ((modMask .|. shiftMask,      xK_q        ), spawn "killall dzen2 && tmux kill-server && xmonad --recompile && xmonad --restart")
+    ]
+    ++
+    [((m .|. modMask, k), windows $ f i)
+    | (i, k) <- zip (XMonad.workspaces conf) [xK_1 .. xK_9]
+    , (f, m) <- [(W.view, 0), (W.shift, shiftMask), (copy, shiftMask .|. mod1Mask)]]
+    ++
+    [((modMask .|. mod1Mask, k), windows $ XMonad.Actions.SwapWorkspaces.swapWithCurrent i)
+    | (i, k) <- zip (XMonad.workspaces conf) [xK_1 .. xK_9]]
+    -- ++
+    --
+    -- mod-{w,e,r}, Switch to physical/Xinerama screens 1, 2, or 3
+    -- mod-shift-{w,e,r}, Move client to screen 1, 2, or 3
+    --
+    -- [((m .|. modMask, key), screenWorkspace sc >>= flip whenJust (windows . f))
+    --    | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
+    --    , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
+myMouse = 
+    [ ((mod4Mask .|. mod1Mask, button4), (\_ -> XMonad.Actions.WorkspaceNames.swapTo Next))
+    , ((mod4Mask, button4), (\_ -> nextWS))
+    , ((mod4Mask .|. mod1Mask, button5), (\_ -> XMonad.Actions.WorkspaceNames.swapTo Prev))
+    , ((mod4Mask, button5), (\_ -> prevWS ))
+    , ((mod1Mask, button3), (\_ -> spawn "fbrun"))
+    ]
+-- ###### End Config ###### ---
+
