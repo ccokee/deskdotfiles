@@ -26,7 +26,9 @@ app.get('/getvalue', function (req, res) {
 	res.json(values);
 	console.log(values);
 });
+
 spawn( './gilfoyle.sh' );
+
 //Checker Bitcoin
 const BitJob = new CronJob('*/5 * * * *', function() {
 
@@ -41,7 +43,7 @@ const requestOptions = {
     convert: 'USD'
   },
   headers: {
-    'X-CMC_PRO_API_KEY': '4b317611-50aa-4412-8675-a778c818c413'
+    'X-CMC_PRO_API_KEY': '4b317611-50aa-4412-y8675-a778c818c413'
   },
   json: true,
   gzip: true
@@ -62,6 +64,7 @@ rp(requestOptions).then(response => {
 	    console.log("The file was saved!");
 	});
   } else {
+	spawn ( './dinesh.sh' );
 	values.Value=price;
 	fs.writeFileSync("/tmp/status_bitcoin", "1", function(err) {
 	   if(err) {
@@ -78,7 +81,6 @@ rp(requestOptions).then(response => {
 });
 
 BitJob.start();
-
 
 // Arrancamos el servidor escuchando en el puerto 3000
 app.listen(60138, function () { 

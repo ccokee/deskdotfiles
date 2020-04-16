@@ -11,7 +11,7 @@
 ~/.xmonad/dzen/status_checks/status_idle.sh
 ) &
 
-##~/.xmonad/dzen/status_checks/status_checker.sh &
+~/.xmonad/dzen/status_checks/mine_checker.sh &
 
 #===
 (while :; do

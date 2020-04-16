@@ -11,22 +11,22 @@ tmux split-window -t Main:0 -v -p 78
 tmux split-window -t Main:0.1 -v -p 10
 tmux split-window -t Main:0.2 -h -p 40
 
-tmux send-keys -t Main:0.0 "while true; do sleep 1; nmtui; done" Enter
+tmux send-keys -t Main:0.0 "while true; do sleep 3; screen sleep 1 nmtui; done" Enter
 tmux send-keys -t Main:0.1 "while true; do sleep 1; screen sleep 1; /home/coke/.xmonad/waitcon.sh 9; done" Enter
 tmux send-keys -t Main:0.2 "while true; do sleep 1; /home/coke/.xmonad/waitcon.sh 10; done" Enter
 tmux send-keys -t Main:0.3 "while true; do sleep 1; /home/coke/.xmonad/whomonitor.sh; done" Enter
 
 # bitchX # 
 tmux split-window -t Main:1 -v -p 90 
-tmux send-keys -t Main:1.0 "sleep 1; screen sleep 1; tty-clock -csBSnr -C 1; done" Enter
+tmux send-keys -t Main:1.0 "while true; do sleep 1; tty-clock -c; done" Enter
 tmux send-keys -t Main:1.1 "while true; do /home/coke/.xmonad/waitcon.sh 1; done" Enter
 
 # mutt #
-tmux send-keys -t Main:2.0 "mutt" Enter
+tmux send-keys -t Main:2.0 "neomutt" Enter
 
 # monitor #
 tmux split-window -t Main:3 -v -p 90
-tmux send-keys -t Main:3.0 "screen sleep 1; tty-clock -csBSnr -C 1" Enter
+tmux send-keys -t Main:3.0 "while true; do sleep 1; tty-clock -c; done" Enter
 tmux send-keys -t Main:3.1 "gotop" Enter
 tmux select-pane -t Main:3.1
 

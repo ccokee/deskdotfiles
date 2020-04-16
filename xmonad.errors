@@ -4,62 +4,62 @@ xmonad.hs:76:16: warning: [-Wdeprecations]
     (imported from XMonad.Actions.GridSelect):
     Deprecated: "Use def (from Data.Default, and re-exported from XMonad.Actions.GridSelect) instead."
    |
-76 |   where conf = defaultGSConfig 
+76 |   where conf = defaultGSConfig
    |                ^^^^^^^^^^^^^^^
 
-xmonad.hs:174:34: warning: [-Wdeprecations]
+xmonad.hs:179:34: warning: [-Wdeprecations]
     In the use of ‘defaultPP’ (imported from XMonad.Hooks.DynamicLog):
     Deprecated: "Use def (from Data.Default, and re-exported by XMonad.Hooks.DynamicLog) instead."
     |
-174 | myLogHook h = dynamicLogWithPP $ defaultPP
+179 | myLogHook h = dynamicLogWithPP $ defaultPP
     |                                  ^^^^^^^^^
 
-xmonad.hs:215:12: warning: [-Wdeprecations]
+xmonad.hs:214:1: warning: [-Wtabs]
+    Tab character found here, and in 77 further locations.
+    Please use spaces instead.
+    |
+214 |                 onWorkspaces ["\61872"] mediaLayout $
+    | ^^^^^^^^
+
+xmonad.hs:221:12: warning: [-Wdeprecations]
     In the use of ‘spacing’ (imported from XMonad.Layout.Spacing):
     Deprecated: "Use spacingRaw instead."
     |
-215 |    tiled = spacing  4 $ ResizableTall 1 (2/100) (0.60) []
+221 |    tiled = spacing  4 $ ResizableTall 1 (2/100) (0.60) []
     |            ^^^^^^^
 
-xmonad.hs:219:13: warning: [-Wdeprecations]
+xmonad.hs:225:13: warning: [-Wdeprecations]
     In the use of ‘spacing’ (imported from XMonad.Layout.Spacing):
     Deprecated: "Use spacingRaw instead."
     |
-219 |     tiled = spacing 4 $ ResizableTall 1 (2/100) (1/2) []
+225 |     tiled = spacing 4 $ ResizableTall 1 (2/100) (1/2) []
     |             ^^^^^^^
 
-xmonad.hs:223:13: warning: [-Wdeprecations]
+xmonad.hs:229:13: warning: [-Wdeprecations]
     In the use of ‘spacing’ (imported from XMonad.Layout.Spacing):
     Deprecated: "Use spacingRaw instead."
     |
-223 |     tiled = spacing 4 $ ResizableTall 1 (2/100) (1/2) []
+229 |     tiled = spacing 4 $ ResizableTall 1 (2/100) (1/2) []
     |             ^^^^^^^
 
-xmonad.hs:227:42: warning: [-Wdeprecations]
+xmonad.hs:233:42: warning: [-Wdeprecations]
     In the use of ‘spacing’ (imported from XMonad.Layout.Spacing):
     Deprecated: "Use spacingRaw instead."
     |
-227 | netLayout = avoidStruts $ smartBorders $ spacing 4 $ reflectHoriz Grid ||| simpleFloat
+233 | netLayout = avoidStruts $ smartBorders $ spacing 4 $ reflectHoriz Grid ||| simpleFloat
     |                                          ^^^^^^^
 
-xmonad.hs:252:5: warning: [-Wdeprecations]
+xmonad.hs:258:5: warning: [-Wdeprecations]
     In the use of ‘defaultXPConfig’ (imported from XMonad.Prompt):
     Deprecated: "Use def (from Data.Default, and re-exported from XMonad.Prompt) instead."
     |
-252 |     defaultXPConfig { font                  = barFont
+258 |     defaultXPConfig { font                  = barFont
     |     ^^^^^^^^^^^^^^^
 
-xmonad.hs:275:16: warning: [-Wtabs]
-    Tab character found here, and in 75 further locations.
-    Please use spaces instead.
-    |
-275 |     [((modMask,             xK_d        ), spawnSelected'       [("Synergy", "/home/coke/.xmonad/synergyconn.sh norestart")
-    |                ^
-
-xmonad.hs:330:61: warning: [-Wdeprecations]
+xmonad.hs:336:61: warning: [-Wdeprecations]
     In the use of ‘defaultGSConfig’
     (imported from XMonad.Actions.GridSelect):
     Deprecated: "Use def (from Data.Default, and re-exported from XMonad.Actions.GridSelect) instead."
     |
-330 |     , ((modMask,                    xK_z    ), goToSelected defaultGSConfig)
+336 |     , ((modMask,                    xK_z    ), goToSelected defaultGSConfig)
     |                                                             ^^^^^^^^^^^^^^^

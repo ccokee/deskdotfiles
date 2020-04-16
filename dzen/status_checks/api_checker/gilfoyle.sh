@@ -1,1 +1,2 @@
-notify-send -i /home/coke/.xmonad/dzen/status_checks/api_checker/Bitcoin.png "Baja el Bitcoin" "Reproducioendo Napalm Death - You suffer!" && mpg123 ./Napalm-Death-You-Suffer.mp3
+notify-send -i /home/coke/.xmonad/dzen/status_checks/api_checker/Ethereum.png "Baja el ethereum" "You suffer!" && killall geth
+#&& mpg123 ./Napalm-Death-You-Suffer.mp3

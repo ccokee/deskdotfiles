@@ -1,7 +1,7 @@
 #!/bin/bash
 
 file='/tmp/status_dropbox'
-status=$(dropbox-cli status)
+status=$(dropbox status)
 
 if [[ ("$status" == "Idle" || "$status" == "Dropbox isn't running!") && -f $file ]]; then
   rm $file

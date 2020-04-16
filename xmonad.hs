@@ -73,7 +73,8 @@ greenColorizer = colorRangeFromClassName
 spawnSelected' :: [(String, String)] -> X ()
 spawnSelected' lst = gridselect conf lst >>= flip whenJust spawn
  --   where conf = spawnConf greenColorizer
-  where conf = defaultGSConfig 
+  where conf = defaultGSConfig
+
 -- ### Terminal ### --
 myTerminal = "terminator"
 
@@ -82,18 +83,16 @@ mymodMask :: KeyMask
 mymodMask = mod4Mask
 
 -- ### Workspaces ### --
-myWorkspaces = ["cKdesk","www","dev","com","file","net","vm","media"]
+myWorkspaces = ["\61704","\61613","\61899","\61705","\62150","\61705","\61872","\63231","\62863","\62622"]
 
 -- ### Bars/Dzen2  ### --
-myScreen1XmonadBarTop = "Lang=es dzen2 -dock -x '0' -y '0' -h '20' -w '1920' -ta 'l' -fg '#999999' -bg '#000000' -fn '-xos4-terminus-*-*-*-*-14-*-*-*-*-*-iso10646-*' -e 'button2=;'"
+myScreen1XmonadBarTop = "~/.xmonad/dzen/status_bars/dzen_cK.sh | Lang=es dzen2 -dock -x '0' -y '0' -h '20' -w '1920' -ta 'l' -fg '#999999' -bg '#000000' -fn '-xos4-terminus-*-*-*-*-14-*-*-*-*-*-iso10646-*' -e 'button2=;'"
 myScreen2XmonadBarTopLeft = "~/.xmonad/dzen/status_bars/dzen_cK.sh | Lang=es dzen2 -dock -x '1920' -y '0' -h '20' -w '40' -ta 'c' -fg '#999999' -bg '#000000' -fn '-xos4-terminus-*-*-*-*-14-*-*-*-*-*-iso10646-*' -e 'button2=;'"
-myScreen2XmonadBarTopMid = "LANG=es dzen2 -dock -x '1960' -y '0' -h '20' -w '1101' -ta 'l' -fg '#999999' -bg '#000000' -fn '-xos4-terminus-*-*-*-*-14-*-*-*-*-*-iso10646-*' -e 'button2=;'"
-myScreen2XmonadBarTopRight = "~/.xmonad/dzen/status_bars/dzen_secondary.sh | LANG=es dzen2 -dock -x '3043' -y '0' -h '20' -w '' -ta 'r' -fg '#999999' -bg '#000000' -fn '-xos4-terminus-*-*-*-*-14-*-*-*-*-*-iso10646-*' -e 'button2=;'"
-myScreen3XmonadBarTop = "LANG=es dzen2 -dock -x '3044' -y '0' -h '20' -w '1920' -ta 'l' -fg '#999999' -bg '#000000' -fn '-xos4-terminus-*-*-*-*-14-*-*-*-*-*-iso10646-*' -e 'button2=;'"
-
+myScreen2XmonadBarTopMid = "dzen2 -dock -x '1960' -y '0' -h '20' -w '1101' -ta 'l' -fg '#999999' -bg '#000000' -fn '-xos4-terminus-*-*-*-*-14-*-*-*-*-*-iso10646-*' -e 'button2=;'"
+myScreen3XmonadBarTop = "~/.xmonad/dzen/status_bars/dzen_secondary.sh | LANG=es dzen2 -dock -x '3840' -y '0' -h '20' -w '1920' -ta 'r' -fg '#999999' -bg '#000000' -fn '-*-FontAwesome-*-*-*-*-9-*-*-*-*-*-*-*' -e 'button2=;'"
 myScreen1XmonadBarDown = "~/.xmonad/dzen/status_bars/dzen_main.sh | LANG=es dzen2 -dock -x '0' -y '1080' -h '20' -w '1920' -ta 'c' -fg '#999999' -bg '#000000' -fn '-xos4-terminus-*-*-*-*-12-*-*-*-*-*-iso10646-*' -e 'button2=;'"
-myScreen2XmonadBarDown = "~/.xmonad/dzen/status_bars/dzen_audio.sh | LANG=es dzen2 -dock -x '1921' -y '1080' -h '20' -w '1920' -ta 'l' -fg '#999999' -bg '#000000' -fn '-xos4-terminus-*-*-*-*-12-*-*-*-*-*-iso10646-*' -e 'button2=;'"
-myScreen3XmonadBarDown = "LANG=es dzen2 -dock -x '3842' -y '1080' -h '20' -w '1920' -ta 'c' -fg '#999999' -bg '#000000' -fn '-xos4-terminus-*-*-*-*-12-*-*-*-*-*-iso10646-*' -e 'button2=;'"
+myScreen2XmonadBarDown = "~/.xmonad/dzen/status_bars/dzen_audio.sh | LANG=es dzen2 -dock -x '1921' -y '1080' -h '20' -w '1920' -ta 'r' -fg '#999999' -bg '#000000' -fn '-xos4-terminus-*-*-*-*-12-*-*-*-*-*-iso10646-*' -e 'button2=;'"
+myScreen3XmonadBarDown = "~/.xmonad/dzen/status_bars/dzen_cK.sh | LANG=es dzen2 -dock -x '3842' -y '1080' -h '20' -w '1920' -ta 'c' -fg '#999999' -bg '#000000' -fn '-xos4-terminus-*-*-*-*-12-*-*-*-*-*-iso10646-*' -e 'button2=;'"
 
 myBitmapsDir = ".xmonad/dzen/icons"
 
@@ -102,7 +101,6 @@ main = do
     dzenScreen1top  <- spawnPipe myScreen1XmonadBarTop
     dzenScreen2topl <- spawnPipe myScreen2XmonadBarTopLeft
     dzenScreen2topm <- spawnPipe myScreen2XmonadBarTopMid
-    dzenScreen2topr <- spawnPipe myScreen2XmonadBarTopRight
     dzenScreen3top  <- spawnPipe myScreen3XmonadBarTop
     dzenScreen1down <- spawnPipe myScreen1XmonadBarDown
     dzenScreen2down <- spawnPipe myScreen2XmonadBarDown
@@ -124,31 +122,36 @@ main = do
 myStartupHook :: X ()
 myStartupHook = do
     setWMName "LG3D"
-    spawn "stalonetray"
-    spawn "feh --bg-fill --no-xinerama ./Imágenes/Wallpapers/2020.png"
-    spawn "compton -cfb -D 1 -r 15 -l -15 -t -12 -o 0.6 -e 1.0 -i 1.0"
-    spawn "setxkbmap es"
-    spawn "xsetroot -cursor_name left_ptr"
-    spawn "npm run start --prefix ~/git/Odrive"
-    spawn "/home/coke/.xmonad/dzen/status_checks/checker.sh"
-    spawn "blueman-applet"
-    spawn "dropbox autostart"
-    spawnOn "file" "thunar"
-    spawnOn "file" "thunar /"
-    spawnOn "www" "opera"
-    spawnOn "com" "skypeforlinux"
-    spawnOn "cKdesk" "/home/coke/.xmonad/cKpanel.sh"
-    spawnOn "net" "terminator -e '/home/coke/.xmonad/cKmayhem.sh'"
+    --spawn "/home/coke/.xmonad/dzen/status_checks/checker.sh"
+    --spawn "feh --bg-fill --no-xinerama ./Imágenes/Wallpapers/2020.png"
+    --spawn "compton -cfb -D 1 -r 15 -l -15 -t -12 -o 0.6 -e 1.0 -i 1.0"
+    --spawn "setxkbmap es"
+    --spawn "stalonetray"
+    --spawn "xsetroot -cursor_name left_ptr"
+    --spawn "sh -c 'sleep 3 && blueman-applet & exit"
+    --spawn "sh -c 'sleep 2 && dropbox autostart & exit'"
+    --spawn "sh -c 'sleep 2 && synergy & exit'"
+    --spawn "sh -c 'sleep 2 && /snap/bin/odrive & exit'"
+    --spawn "sh -c 'sleep 2 && nm-applet & exit"
+    spawn "/home/coke/.xmonad/autostart.sh" 
+    spawnOn "\61705" "sh -c 'sleep 1 && thunar'"
+    spawnOn "\61705" "sh -c 'sleep 1 && thunar /'"
+    spawnOn "\61613" "sh -c 'sleep 1 && opera -restore-last-session'"
+    spawnOn "\62150" "sh -c 'sleep 1 && skypeforlinux'"
+    spawnOn "\62150" "sh -c 'sleep 1 && telegram-desktop'"
+    spawnOn "\61704" "sh -c 'sleep 1 && /home/coke/.xmonad/cKpanel.sh'"
+    spawnOn "\63231" "sh -c 'sleep 1 && terminator -e /home/coke/.xmonad/cKmayhem.sh'"
+    spawnOn "\62863" "spotify"
 
 -- ### ManageHook ### --
 myManageHook :: ManageHook
 myManageHook = (composeAll . concat $
     [ [resource     =? r            --> doIgnore                |   r   <- myIgnores] -- ignore desktop
-    , [className    =? c            --> doShift  "dev"          |   c   <- myDev    ] -- move myDev to dev
-    , [className    =? c            --> doShift  "file"         |   c   <- myFiles  ] -- move myFiles to file
-    , [className    =? c            --> doShift  "media"        |   c   <- myMedia  ] -- move myMedia to media
-    , [className    =? c            --> doShift  "com"          |   c   <- myChat   ] -- move myChat  to com
-    , [className    =? c            --> doShift  "vm"           |   c   <- myVBox   ] -- move myVBox  to virt
+    , [className    =? c            --> doShift  "\61899"          |   c   <- myDev    ] -- move myDev to dev
+    , [className    =? c            --> doShift  "\61705"         |   c   <- myFiles  ] -- move myFiles to file
+    , [className    =? c            --> doShift  "\62863"        |   c   <- myMedia  ] -- move myMedia to media
+    , [className    =? c            --> doShift  "\62150"          |   c   <- myChat   ] -- move myChat  to com
+    , [className    =? c            --> doShift  "\62622"           |   c   <- myVBox   ] -- move myVBox  to virt
     , [className    =? c            --> doCenterFloat           |   c   <- myFloats ] -- float my floats
     , [name         =? n            --> doCenterFloat           |   n   <- myNames  ] -- float my names
     , [isFullscreen                 --> myDoFullFloat                           ]]) 
@@ -158,9 +161,9 @@ myManageHook = (composeAll . concat $
         role      = stringProperty "WM_WINDOW_ROLE"
         name      = stringProperty "WM_NAME"
         -- classnames
-        myTerms   = ["aterm","urxvt","terminator","xfce4-terminal"]
+        myTerms   = ["aterm","urxvt","terminator"]
         myFloats  = ["vlc","gimp","VirtualBox","skype"]
-        myWebs    = ["firefox","google-chrome","chrome","opera"]
+        myWebs    = ["firefox","chrome","Opera","iceweasel"]
         myMedia   = ["Spotify","vlc","VLC","kodi","Kodi"]
         myChat    = ["skype"]
         myFiles   = ["nautilus","mc"]
@@ -200,14 +203,15 @@ myLogHook h = dynamicLogWithPP $ defaultPP
     }
 
 -- ### LayoutHook ### --
-myLayoutHook  = onWorkspaces ["cKdesk"] cKlapLayout $ 
-                onWorkspaces ["web"] wwwLayout $
-                onWorkspaces ["dev"] simpLayout $
-                onWorkspaces ["com"] chatLayout $
-                onWorkspaces ["file"] simpLayout $
-                onWorkspaces ["net"] netLayout $
-                onWorkspaces ["vm"] vBoxLayout $
-                onWorkspaces ["media"] mediaLayout $
+myLayoutHook  = onWorkspaces ["\61704"] cKlapLayout $ 
+                onWorkspaces ["\61613"] wwwLayout $
+                onWorkspaces ["\61899"] simpLayout $
+                onWorkspaces ["\62150"] chatLayout $
+                onWorkspaces ["\61705"] simpLayout $
+                onWorkspaces ["\63231"] netLayout $
+                onWorkspaces ["\62622"] vBoxLayout $
+                onWorkspaces ["\62863"] mediaLayout $
+		onWorkspaces ["\61872"] mediaLayout $
                 simpLayout
 
 -- ### Layouts ### --
@@ -274,38 +278,38 @@ myDoFullFloat = doF W.focusDown <+> doFullFloat
 
 
 myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
-    [((modMask,		    xK_d        ), spawnSelected'	[("Synergy", "/home/coke/.xmonad/synergyconn.sh norestart")
+    [((modMask,		    xK_d        ), spawnSelected'	[("Synergy", "synergy")
 									,("Arandr", "arandr")
 									,("screen left", "/home/coke/.xmonad/lrandr.sh l")
 									,("screen right", "/home/coke/.xmonad/lrandr.sh r")
 									,("screen top", "/home/coke/.xmonad/lrandr.sh t")
 									,("screen bottom", "/home/coke/.xmonad/lrandr.sh b") 
 									])
-   , ((modMask,                    xK_r    ), spawnSelected'                 [("cKdesk",     "xfce4-terminal -e '/home/coke/.xmonad/waitcon.sh 2'")
-                                                                              ,("cKtv",       "xfce4-terminal -e '/home/coke/.xmonad/waitcon.sh 3'")
-                                                                              ,("cKws",       "xfce4-terminal -e '/home/coke/.xmonad/waitcon.sh 4'")
-                                                                              ,("cKvpn",      "xfce4-terminal -e '/home/coke/.xmonad/waitcon.sh 5'")
-                                                                              ,("cKsas",      "xfce4-terminal -e '/home/coke/.xmonad/waitcon.sh 6'")
-                                                                              ,("cKboard",    "xfce4-terminal -e '/home/coke/.xmonad/waitcon.sh 7'")
-									      ,("cKpppoe",    "xfce4-terminal -e '/home/coke/.xmonad/waitcon.sh 10'")
-									      ,("cKbodega",   "xfce4-terminal -e '/home/coke/.xmonad/waitcon.sh 11'")
-                                                                              ,("tun0",       "xfce4-terminal -e '/home/coke/.xmonad/waitcon.sh 8'")
-                                                                              ,("tun1",       "xfce4-terminal -e '/home/coke/.xmonad/waitcon.sh 9'")
+   , ((modMask,                    xK_r    ), spawnSelected'                 [("cKdesk",     "terminator -e '/home/coke/.xmonad/waitcon.sh 2'")
+                                                                              ,("cKtv",       "terminator -e '/home/coke/.xmonad/waitcon.sh 3'")
+                                                                              ,("cKws",       "terminator -e '/home/coke/.xmonad/waitcon.sh 4'")
+                                                                              ,("cKvpn",      "terminator -e '/home/coke/.xmonad/waitcon.sh 5'")
+                                                                              ,("cKsas",      "terminator -e '/home/coke/.xmonad/waitcon.sh 6'")
+                                                                              ,("cKboard",    "terminator -e '/home/coke/.xmonad/waitcon.sh 7'")
+									      ,("cKpppoe",    "terminator -e '/home/coke/.xmonad/waitcon.sh 10'")
+									      ,("cKbodega",   "terminator -e '/home/coke/.xmonad/waitcon.sh 11'")
+                                                                              ,("tun0",       "terminator -e '/home/coke/.xmonad/waitcon.sh 8'")
+                                                                              ,("tun1",       "terminator -e '/home/coke/.xmonad/waitcon.sh 9'")
                                                                               ,("Exit",           "")
                                                                               ])
-    , ((modMask .|. shiftMask,      xK_r    ), spawnSelected'                 [("desk.wol",        "xfce4-terminal -e '/home/coke/.xmonad/wol.sh'")
-                                                                              ,("desk.vnc",        "xfce4-terminal -e '/home/coke/.xmonad/vnc-conn.sh'")
-                                                                              ,("vpn.wol",         "xfce4-terminal -e '/home/coke/.xmonad/wol.sh 2'")
-                                                                              ,("vpn.route",       "xfce4-terminal -e '/home/coke/.xmonad/routeswitch.sh'")
-                                                                              ,("nas.plex",        "google-chrome-stable 'http://doctorbit.sytes.net:8002'")
-                                                                              ,("nas.deluge",      "google-chrome-stable 'http://doctorbit.sytes.net:8112'")
-                                                                              ,("net.monitor",     "google-chrome-stable 'http://doctorbit.sytes.net:8030'")
-                                                                              ,("dns.webui",       "google-chrome-stable 'http://doctorbit.sytes.net:8005'")
-                                                                              ,("kodi.remote",     "google-chorme-stable 'http://doctorbit.sytes.net:8004'")
-                                                                              ,("Panic Button!",   "google-chrome-stable 'http://doctorbit.sytes.net:8020'")
+    , ((modMask .|. shiftMask,      xK_r    ), spawnSelected'                 [("desk.wol",        "terminator -e '/home/coke/.xmonad/wol.sh'")
+                                                                              ,("desk.vnc",        "terminator -e '/home/coke/.xmonad/vnc-conn.sh'")
+                                                                              ,("vpn.wol",         "terminator -e '/home/coke/.xmonad/wol.sh 2'")
+                                                                              ,("vpn.route",       "terminator -e '/home/coke/.xmonad/routeswitch.sh'")
+                                                                              ,("nas.plex",        "opera 'http://doctorbit.sytes.net:8002'")
+                                                                              ,("nas.deluge",      "opera 'http://doctorbit.sytes.net:8112'")
+                                                                              ,("net.monitor",     "opera 'http://doctorbit.sytes.net:8030'")
+                                                                              ,("dns.webui",       "opera 'http://doctorbit.sytes.net:8005'")
+                                                                              ,("kodi.remote",     "opera 'http://doctorbit.sytes.net:8004'")
+                                                                              ,("Panic Button!",   "opera 'http://doctorbit.sytes.net:8020'")
                                                                               ,("Exit",           "")
                                                                               ])
-    , ((modMask,                    xK_v    ), spawnSelected' [("Windows 10",     "VBoxManage startvm 'Windows 10'")
+    , ((modMask,                    xK_v    ), spawnSelected' [("Windows 10",   "VBoxManage startvm 'Windows 10'")
                                                                               ,("Aderall",        "VBoxManage startvm 'Aderall'")
                                                                               ,("Stratera",       "VBoxManage startvm 'Stratera'")
                                                                               ,("Exit",           "")
@@ -324,15 +328,15 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
                                                                               ,("Exit",           "")
                                                                               ])
     , ((modMask,                    xK_k        ), spawn $ XMonad.terminal conf)
-    , ((modMask .|. controlMask,    xK_k        ), runOrRaise "xfce4-terminal" (className =? "xfce4-terminal"))
+    , ((modMask .|. controlMask,    xK_k        ), runOrRaise "terminator" (className =? "terminator"))
     , ((modMask,                    xK_F2       ), spawn "lock & hibernate")
     , ((modMask,                    xK_F12      ), spawn "sudo halt")
     , ((modMask,                    xK_F11      ), spawn "sudo reboot")
     , ((modMask,                    xK_KP_Insert ), spawn "sudo /home/coke/.xmonad/mountswitch.sh")
     , ((modMask,                    xK_z    ), goToSelected defaultGSConfig)
-    , ((modMask,                    xK_x    ), spawnSelected' [("Halt","sudo halt"),("Reboot","sudo reboot"),("Suspend","xscreensaver-command -lock && sudo s2ram"),("Exit","")])
+    , ((modMask,                    xK_x    ), spawnSelected' [("Shutdown","poweroff"),("Reboot","reboot"),("Suspend","pm-suspend"),("Hibernate","pm-hibernate"),("Exit","")])
     , ((modMask .|. shiftMask,      xK_c        ), spawn "iceweasel")
-    , ((modMask,                    xK_l        ), spawn "lock")
+    , ((modMask,                    xK_l        ), spawn "i3lock-fancy -- scrot -z")
     
     , ((0,                          xK_Print    ), spawn "scrot $HOME/screenshots/`date +%d-%m-%Y_%H:%M:%S`.png -e 'xclip -selection clipboard -t image/png -i $f'")
     , ((modMask .|. controlMask,    xK_s        ), spawn "sleep 0.5; scrot -s $HOME/screenshots/`date +%d-%m-%Y_%H:%M:%S`.png -e 'xclip -selection clipboard -t image/png -i $f'")
@@ -340,31 +344,26 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((modMask,                    xK_c        ), spawn "opera")
     , ((modMask,                    xK_n        ), spawn "thunar")
     
-    , ((0,                          0x1008ff12  ), spawn "amixer -c 0 sset Master toggle")        -- XF86AudioMute
-    , ((0,                          0x1008ff11  ), spawn "amixer -c 0 sset Master 5%-")           -- XF86AudioLowerVolume
-    , ((0,                          0x1008ff13  ), spawn "amixer -c 0 sset Master 5%+")  
-    , ((0,                          0x1008ff14  ), spawn "mpc play")
-    , ((0,                          0x1008ff15  ), spawn "mpc stop")
-    , ((0,                          0x1008ff17  ), spawn "mpc next")
-    , ((0,                          0x1008ff16  ), spawn "mpc prev")
+    , ((0,                          0x1008ff12  ), spawn "pulsemixer --toogle-mute")        -- XF86AudioMute
+    , ((0,                          0x1008ff11  ), spawn "")           -- XF86AudioLowerVolume
+    , ((0,                          0x1008ff13  ), spawn "pulsemixer --changevolume +5")  
     , ((modMask,                    xK_g        ), spawn "gimp")
     , ((modMask .|. shiftMask,      xK_v        ), spawn "virtualbox")
-    , ((modMask .|. shiftMask,      xK_w        ), spawn "sudo wireshark")
-    , ((modMask .|. controlMask,    xK_w        ), spawn "sudo zenmap")
-    , ((modMask,                    xK_o        ), spawn "~/tor-browser_es-ES/Browser/start-tor-browser")
-    , ((modMask,        xK_KP_Insert        ), spawn "/home/coke/.xmonad/audioswitch.sh")
+    , ((modMask .|. shiftMask,      xK_w        ), spawn "wireshark")
+    , ((modMask .|. controlMask,    xK_w        ), spawn "zenmap")
+    , ((modMask,                    xK_o        ), spawn "torbrowser-launcher")
     , ((modMask,                    xK_m        ), spawn "vlc")
     , ((modMask .|. shiftMask,      xK_m        ), spawn "kodi")
     , ((modMask,                    xK_e        ), spawn "code")
     , ((modMask .|. shiftMask,      xK_e        ), spawn "gedit --new-window") 
-    , ((modMask .|. controlMask,       xK_e        ), spawn "eclipse-bin-4.6")
+    , ((modMask .|. controlMask,       xK_e        ), spawn "home/coke/eclipse/java-2019-12/eclipse/eclipse")
     , ((modMask,                    xK_space    ), sendMessage NextLayout)
     , ((modMask .|. shiftMask,      xK_space    ), setLayout $ XMonad.layoutHook conf)          -- reset layout on current desktop to default
     , ((modMask,                    xK_b        ), sendMessage ToggleStruts)
     , ((modMask .|. mod1Mask,       xK_r        ), spawn "gmrun")
     , ((modMask,                    xK_Tab      ), windows W.focusDown)                       
-    -- , ((modMask .|. shiftMask,      xK_j        ), windows W.focusDown)
-    -- , ((modMask .|. shiftMask,      xK_k        ), windows W.focusUp  )
+    , ((modMask,      xK_p        ), spawn "spotify")
+    , ((modMask .|. shiftMask,      xK_p        ), spawn "sh -c 'killall spotify'")
     , ((modMask .|. shiftMask,      xK_k        ), kill)
     , ((modMask .|. mod1Mask,       xK_k	), kill1)
     , ((modMask .|. mod1Mask .|. shiftMask,       xK_k        ), killAllOtherCopies)
